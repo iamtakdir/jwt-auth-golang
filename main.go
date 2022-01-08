@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/iamtakdir/jwt-auth-go/database"
 	"github.com/iamtakdir/jwt-auth-go/routes"
 
@@ -11,6 +12,12 @@ func main() {
 	connection.Connect()
 
 	app := fiber.New()
+
+	//Cors issue resolved
+
+	app.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+	}))
 
 	routes.Setup(app)
 
