@@ -118,8 +118,9 @@ func Login(c *fiber.Ctx) error {
 }
 
 func User(c *fiber.Ctx) error {
+	//grab the token
 	cookie := c.Cookies("access-token")
-
+	//Parse with claims and see if its valid or not
 	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(SecretKey), nil
 	})
@@ -131,8 +132,12 @@ func User(c *fiber.Ctx) error {
 		})
 	}
 
+	//Validate or verify token with standard claims
+
 	claims := token.Claims.(*jwt.StandardClaims)
+
 	//Querying data with token
+	
 	var user models.User
 	connection.DB.Where("email = ?", claims.Issuer).First(&user)
 
