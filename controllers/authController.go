@@ -116,3 +116,42 @@ func Login(c *fiber.Ctx) error {
 		"message": "Success",
 	})
 }
+
+func User(c *fiber.Ctx) error {
+	cookie := c.Cookies("access-token")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SecretKey), nil
+	})
+
+	if err != nil {
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{
+			"message": "Unauthorized",
+		})
+	}
+
+	claims := token.Claims.(*jwt.StandardClaims)
+	//Querying data with token
+	var user models.User
+	connection.DB.Where("email = ?", claims.Issuer).First(&user)
+
+	return c.JSON(user)
+
+}
+
+// Logout For logout we need to generate new token
+func Logout(c *fiber.Ctx) error {
+
+	cookie := fiber.Cookie{
+		Name:     "access-token",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		HTTPOnly: true,
+	}
+
+	c.Cookie(&cookie)
+	return c.JSON(fiber.Map{
+		"message": "user logout",
+	})
+}
