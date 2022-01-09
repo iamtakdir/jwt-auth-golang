@@ -23,5 +23,6 @@ func Connect() {
 	DB = connect
 
 	connect.AutoMigrate(models.User{})
+	connect.AutoMigrate(models.Token{})
 
 }

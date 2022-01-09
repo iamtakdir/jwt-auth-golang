@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 	connection "github.com/iamtakdir/jwt-auth-go/database"
@@ -97,10 +98,6 @@ func Login(c *fiber.Ctx) error {
 		})
 
 	}
-	//if everything is ok return authenticated message
-	//return c.JSON(fiber.Map{
-	//	"message": "Successfully Authenticated",
-	//})
 
 	//Store it into cookie
 
@@ -111,6 +108,15 @@ func Login(c *fiber.Ctx) error {
 		HTTPOnly: true,
 	}
 	c.Cookie(&cookie)
+
+	//Save user access token to database
+	userToken := models.Token{
+		Email:   data["email"],
+		TokenId: cookie.Value,
+	}
+	connection.DB.Create(&userToken)
+
+	fmt.Println(cookie.Value)
 
 	return c.JSON(fiber.Map{
 		"message": "Success",
@@ -137,7 +143,7 @@ func User(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	//Querying data with token
-	
+
 	var user models.User
 	connection.DB.Where("email = ?", claims.Issuer).First(&user)
 
